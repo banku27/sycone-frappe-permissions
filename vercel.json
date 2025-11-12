@@ -1,19 +1,8 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "frappe_permissions_configurator.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/frappe_permissions_configurator.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frappe_permissions_configurator.html"
+      "source": "/(.*)",
+      "destination": "/frappe_permissions_configurator.html"
     }
   ],
   "headers": [
