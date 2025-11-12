@@ -1,12 +1,6 @@
 {
   "version": 2,
   "name": "frappe-permissions-configurator",
-  "builds": [
-    {
-      "src": "frappe_permissions_configurator.html",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "/",
