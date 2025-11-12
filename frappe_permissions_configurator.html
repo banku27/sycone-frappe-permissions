@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frappe HRMS Permissions Configurator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .search-box {
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 300px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .stats {
+            padding: 20px 30px;
+            background: white;
+            display: flex;
+            gap: 30px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .stat-card {
+            flex: 1;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .role-cell {
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 5;
+        }
+        
+        tbody tr:hover .role-cell {
+            background: #f8f9fa;
+        }
+        
+        .doctype-header {
+            background: #e9ecef;
+            font-weight: 600;
+            color: #495057;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .doctype-header:hover {
+            background: #dee2e6;
+        }
+        
+        .checkbox-container {
+            display: inline-block;
+            position: relative;
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        
+        .permission-label {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 0 2px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        
+        .permission-label:hover {
+            transform: scale(1.05);
+        }
+        
+        .permission-label.read {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .permission-label.write {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .permission-label.submit {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .permission-label.cancel {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .permission-label.report {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: #495057;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .export-format {
+            margin: 15px 0;
+        }
+        
+        .export-format label {
+            display: block;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .export-format label:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        
+        .export-format input[type="radio"]:checked + span {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 2000;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .quick-select {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .quick-select h3 {
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .template-btn {
+            padding: 8px 15px;
+            margin: 5px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+        }
+        
+        .template-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .floating-save {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+        }
+        
+        .floating-save .btn {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Frappe HRMS Permissions Configurator</h1>
+            <p>Define permissions for 25 roles across 81 DocTypes</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <input type="text" class="search-box" id="searchBox" placeholder="Search roles or doctypes...">
+                <button class="btn btn-secondary" onclick="clearSearch()">Clear</button>
+            </div>
+            
+            <div class="control-group">
+                <button class="btn btn-warning" onclick="showQuickTemplates()">Quick Templates</button>
+                <button class="btn btn-secondary" onclick="selectAll()">Select All</button>
+                <button class="btn btn-secondary" onclick="deselectAll()">Clear All</button>
+                <button class="btn btn-secondary" onclick="clearSavedData()" style="background: #dc3545; color: white;">Reset Data</button>
+            </div>
+            
+            <div class="control-group">
+                <button class="btn btn-success" onclick="exportData()">Export Configuration</button>
+                <button class="btn btn-primary" onclick="importData()">Import Configuration</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="roleCount">25</h3>
+                <p>Total Roles</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="doctypeCount">81</h3>
+                <p>Total DocTypes</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="permissionCount">0</h3>
+                <p>Permissions Set</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="completionPercent">0%</h3>
+                <p>Completion</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="quick-select" id="quickSelect" style="display: none;">
+                <h3>Quick Permission Templates</h3>
+                <button class="template-btn" onclick="applyTemplate('admin')">Admin (Full Access)</button>
+                <button class="template-btn" onclick="applyTemplate('manager')">Manager (Read/Write/Submit)</button>
+                <button class="template-btn" onclick="applyTemplate('employee')">Employee (Read Only)</button>
+                <button class="template-btn" onclick="applyTemplate('hr')">HR (HR Module Full)</button>
+                <button class="template-btn" onclick="applyTemplate('finance')">Finance (Salary/Claims)</button>
+                <button class="template-btn" onclick="applyTemplate('custom')">Custom Selection</button>
+            </div>
+
+            <table id="permissionsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 200px;">Role / DocType</th>
+                        <th style="text-align: center;">Permissions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Table will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="floating-save">
+        <button class="btn btn-success" onclick="saveProgress()">💾 Save Progress</button>
+    </div>
+
+    <!-- Processing Message Overlay -->
+    <div id="processingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); min-width: 300px;">
+            <div class="spinner" style="margin: 0 auto 20px; width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <h3 id="processingMessage" style="color: #495057; font-size: 20px; margin-bottom: 15px;">Processing...</h3>
+            <p id="processingSubMessage" style="color: #6c757d; font-size: 14px; margin-bottom: 20px;">Please wait while we update permissions</p>
+            <div style="width: 250px; height: 6px; background: #e9ecef; border-radius: 3px; margin: 0 auto;">
+                <div id="processingProgress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 3px; transition: width 0.3s ease;"></div>
+            </div>
+            <p id="processingCount" style="color: #6c757d; font-size: 12px; margin-top: 10px;">0 / 0</p>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Export Permissions Configuration</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            
+            <div class="export-format">
+                <label>
+                    <input type="radio" name="exportFormat" value="json" checked>
+                    <span>JSON Format (For Import)</span>
+                </label>
+                <label>
+                    <input type="radio" name="exportFormat" value="csv">
+                    <span>CSV Format (For Excel)</span>
+                </label>
+                <label>
+                    <input type="radio" name="exportFormat" value="frappe">
+                    <span>Frappe Import Format</span>
+                </label>
+            </div>
+            
+            <button class="btn btn-primary" onclick="downloadExport()">Download File</button>
+            <button class="btn btn-secondary" onclick="copyToClipboard()" style="margin-left: 10px;">Copy to Clipboard</button>
+            
+            <h3 style="margin-top: 20px;">Preview:</h3>
+            <div style="position: relative;">
+                <button class="btn btn-secondary" onclick="selectAllText()" style="position: absolute; top: 5px; right: 5px; padding: 5px 10px; font-size: 12px;">Select All</button>
+                <pre id="exportPreview"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure
+        const roles = [
+            'Admin Executive', 'Business Head', 'Deputy Manager', 'Director', 'Engineer',
+            'General Manager', 'HR Executive', 'Junior Engineer', 'Lab Technician', 'Manager',
+            'Managing Director', 'Office Assistant', 'Project Assistance', 'Project Coordinator',
+            'Project Director', 'Project Engineer', 'Project Manager', 'Senior Accounts Executive',
+            'Senior Engineer', 'Senior Manager', 'Senior Project Engineer', 'Senior Project Manager',
+            'Senior safety officer', 'Site Engineer', 'Site Supervisor'
+        ];
+
+        const doctypes = [
+            'Employee', 'Salary Slip', 'Employee Benefit Application', 'Expense Claim', 'Leave Application',
+            'Attendance Request', 'Compensatory Leave Request', 'Employee Tax Exemption Declaration',
+            'Employee Tax Exemption Proof Submission', 'Timesheet', 'Employee Checkin', 'Shift Request',
+            'Employee Grievance', 'Employee Referral', 'Salary Component', 'Shift Type', 'Designation',
+            'Employee Grade', 'Employee Health Insurance', 'Salary Structure', 'Employee Tax Exemption Sub Category',
+            'Payroll Period', 'Attendance', 'Leave Type', 'Grievance Type', 'Leave Allocation',
+            'Employee Tax Exemption Category', 'Job Applicant', 'Department', 'Additional Salary',
+            'Employment Type', 'Branch', 'Driver', 'Job Offer', 'Full and Final Statement',
+            'Staffing Plan', 'Goal', 'Leave Ledger Entry', 'Interest', 'Shift Schedule Assignment',
+            'Appraisal Cycle', 'Leave Period', 'HR Settings', 'Interview Type', 'Job Applicant Source',
+            'Leave Block List', 'Interview Feedback', 'Employee Performance Feedback', 'Appraisal Template',
+            'Leave Policy', 'Leave Encashment', 'Shift Location', 'Leave Policy Assignment',
+            'Shift Schedule', 'Shift Assignment Tool', 'Upload Attendance', 'Leave Control Panel',
+            'Employee Transfer', 'Shift Assignment', 'Offer Term', 'Employee Feedback Criteria',
+            'Interview Round', 'Interview', 'Job Opening', 'Daily Work Summary', 'Employee Promotion',
+            'Retention Bonus', 'Gratuity', 'Gratuity Rule', 'Salary Structure Assignment',
+            'Employee Incentive', 'Employee Other Income', 'Employee Benefit Claim',
+            'Bulk Salary Structure Assignment', 'Income Tax Slab', 'Appraisal'
+        ];
+
+        const permissions = ['read', 'write', 'submit', 'cancel', 'report'];
+        let permissionsData = {};
+
+        // Initialize data structure
+        function initializeData() {
+            roles.forEach(role => {
+                permissionsData[role] = {};
+                doctypes.forEach(doctype => {
+                    permissionsData[role][doctype] = {
+                        read: false,
+                        write: false,
+                        submit: false,
+                        cancel: false,
+                        report: false
+                    };
+                });
+            });
+            loadFromLocalStorage();
+        }
+
+        // Build table with optimized rendering
+        function buildTable() {
+            showProcessingMessage('Building permission table...');
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            let roleIndex = 0;
+            
+            function renderNextRole() {
+                if (roleIndex >= roles.length) {
+                    hideProcessingMessage();
+                    updateStats();
+                    return;
+                }
+                
+                const role = roles[roleIndex];
+                updateProgressMessage(`Loading role ${roleIndex + 1} of ${roles.length}: ${role}`);
+                
+                // Role header row
+                const roleRow = document.createElement('tr');
+                roleRow.innerHTML = `
+                    <td class="role-cell" colspan="2">
+                        <strong style="font-size: 16px; color: #667eea;">📋 ${role}</strong>
+                    </td>
+                `;
+                tbody.appendChild(roleRow);
+
+                // DocType rows for this role
+                doctypes.forEach(doctype => {
+                    const row = document.createElement('tr');
+                    row.className = 'doctype-row';
+                    row.dataset.role = role;
+                    row.dataset.doctype = doctype;
+                    
+                    row.innerHTML = `
+                        <td style="padding-left: 30px;">${doctype}</td>
+                        <td>
+                            ${permissions.map(perm => `
+                                <label class="permission-label ${perm}">
+                                    <input type="checkbox" 
+                                           id="${role}-${doctype}-${perm}"
+                                           data-role="${role}"
+                                           data-doctype="${doctype}"
+                                           data-permission="${perm}"
+                                           onchange="updatePermission(this)"
+                                           ${permissionsData[role][doctype][perm] ? 'checked' : ''}>
+                                    ${perm.charAt(0).toUpperCase() + perm.slice(1)}
+                                </label>
+                            `).join('')}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                roleIndex++;
+                
+                // Render next role after a small delay to keep UI responsive
+                setTimeout(renderNextRole, 10);
+            }
+            
+            renderNextRole();
+        }
+
+        // Helper functions for processing messages
+        function showProcessingMessage(message, subMessage = 'Please wait while we update permissions') {
+            const overlay = document.getElementById('processingOverlay');
+            document.getElementById('processingMessage').textContent = message;
+            document.getElementById('processingSubMessage').textContent = subMessage;
+            document.getElementById('processingProgress').style.width = '0%';
+            document.getElementById('processingCount').textContent = '';
+            overlay.style.display = 'flex';
+        }
+        
+        function updateProgressMessage(message, progress = null, count = null) {
+            document.getElementById('processingMessage').textContent = message;
+            if (progress !== null) {
+                document.getElementById('processingProgress').style.width = progress + '%';
+            }
+            if (count !== null) {
+                document.getElementById('processingCount').textContent = count;
+            }
+        }
+        
+        function hideProcessingMessage() {
+            document.getElementById('processingOverlay').style.display = 'none';
+        }
+
+        // Update permission (optimized)
+        function updatePermission(checkbox, skipSave = false) {
+            const role = checkbox.dataset.role;
+            const doctype = checkbox.dataset.doctype;
+            const permission = checkbox.dataset.permission;
+            
+            permissionsData[role][doctype][permission] = checkbox.checked;
+            
+            // Auto-check read if any other permission is checked
+            if (checkbox.checked && permission !== 'read') {
+                const readCheckbox = document.getElementById(`${role}-${doctype}-read`);
+                if (readCheckbox && !readCheckbox.checked) {
+                    readCheckbox.checked = true;
+                    permissionsData[role][doctype].read = true;
+                }
+            }
+            
+            if (!skipSave) {
+                updateStats();
+                // Debounce save to prevent too many saves
+                clearTimeout(window.saveTimeout);
+                window.saveTimeout = setTimeout(() => {
+                    saveToLocalStorage();
+                }, 500);
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            let totalPermissions = 0;
+            let setPermissions = 0;
+
+            roles.forEach(role => {
+                doctypes.forEach(doctype => {
+                    permissions.forEach(perm => {
+                        totalPermissions++;
+                        if (permissionsData[role][doctype][perm]) {
+                            setPermissions++;
+                        }
+                    });
+                });
+            });
+
+            document.getElementById('permissionCount').textContent = setPermissions;
+            document.getElementById('completionPercent').textContent = 
+                Math.round((setPermissions / totalPermissions) * 100) + '%';
+            
+            // Update progress bar
+            document.getElementById('progressFill').style.width = 
+                (setPermissions / totalPermissions) * 100 + '%';
+        }
+
+        // Search functionality
+        function searchTable() {
+            const searchValue = document.getElementById('searchBox').value.toLowerCase();
+            const rows = document.querySelectorAll('.doctype-row');
+            
+            rows.forEach(row => {
+                const role = row.dataset.role.toLowerCase();
+                const doctype = row.dataset.doctype.toLowerCase();
+                
+                if (role.includes(searchValue) || doctype.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Clear search
+        function clearSearch() {
+            document.getElementById('searchBox').value = '';
+            searchTable();
+        }
+
+        // Select all permissions with batch processing
+        function selectAll() {
+            showProcessingMessage('Selecting All Permissions', 'This will enable all permission settings');
+            
+            // Update data structure first (fast)
+            roles.forEach(role => {
+                doctypes.forEach(doctype => {
+                    permissions.forEach(perm => {
+                        permissionsData[role][doctype][perm] = true;
+                    });
+                });
+            });
+            
+            // Update UI in batches (prevents hanging)
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const totalCheckboxes = checkboxes.length;
+            let index = 0;
+            
+            function processBatch() {
+                const batchSize = 100;
+                const end = Math.min(index + batchSize, totalCheckboxes);
+                
+                for (let i = index; i < end; i++) {
+                    checkboxes[i].checked = true;
+                }
+                
+                index = end;
+                const progress = Math.round((index / totalCheckboxes) * 100);
+                
+                if (index < totalCheckboxes) {
+                    updateProgressMessage(
+                        'Selecting Permissions...', 
+                        progress,
+                        `${index} / ${totalCheckboxes} checkboxes`
+                    );
+                    setTimeout(processBatch, 10);
+                } else {
+                    updateProgressMessage('Finalizing...', 100, `${totalCheckboxes} / ${totalCheckboxes} checkboxes`);
+                    setTimeout(() => {
+                        hideProcessingMessage();
+                        updateStats();
+                        saveToLocalStorage();
+                    }, 500);
+                }
+            }
+            
+            // Start processing after a small delay to ensure loading screen appears
+            setTimeout(processBatch, 100);
+        }
+
+        // Deselect all permissions with batch processing
+        function deselectAll() {
+            showProcessingMessage('Clearing All Permissions', 'This will remove all permission settings');
+            
+            // Update data structure first (fast)
+            roles.forEach(role => {
+                doctypes.forEach(doctype => {
+                    permissions.forEach(perm => {
+                        permissionsData[role][doctype][perm] = false;
+                    });
+                });
+            });
+            
+            // Update UI in batches
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const totalCheckboxes = checkboxes.length;
+            let index = 0;
+            
+            function processBatch() {
+                const batchSize = 100;
+                const end = Math.min(index + batchSize, totalCheckboxes);
+                
+                for (let i = index; i < end; i++) {
+                    checkboxes[i].checked = false;
+                }
+                
+                index = end;
+                const progress = Math.round((index / totalCheckboxes) * 100);
+                
+                if (index < totalCheckboxes) {
+                    updateProgressMessage(
+                        'Clearing Permissions...', 
+                        progress,
+                        `${index} / ${totalCheckboxes} checkboxes`
+                    );
+                    setTimeout(processBatch, 10);
+                } else {
+                    updateProgressMessage('Finalizing...', 100, `${totalCheckboxes} / ${totalCheckboxes} checkboxes`);
+                    setTimeout(() => {
+                        hideProcessingMessage();
+                        updateStats();
+                        saveToLocalStorage();
+                    }, 500);
+                }
+            }
+            
+            // Start processing after a small delay to ensure loading screen appears
+            setTimeout(processBatch, 100);
+        }
+
+        // Show quick templates
+        function showQuickTemplates() {
+            const quickSelect = document.getElementById('quickSelect');
+            quickSelect.style.display = quickSelect.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Apply template with optimized batch processing
+        function applyTemplate(template) {
+            let templateName = '';
+            let description = '';
+            
+            switch(template) {
+                case 'admin':
+                    templateName = 'Admin Template';
+                    description = 'Full access for Admin and Director roles';
+                    break;
+                case 'manager':
+                    templateName = 'Manager Template';
+                    description = 'Read, Write, and Submit for all Manager roles';
+                    break;
+                case 'employee':
+                    templateName = 'Employee Template';
+                    description = 'Read-only access to basic employee documents';
+                    break;
+                case 'hr':
+                    templateName = 'HR Template';
+                    description = 'Full access to all HR documents for HR roles';
+                    break;
+                default:
+                    templateName = 'Custom Template';
+                    description = 'Applying custom permission template';
+            }
+            
+            showProcessingMessage(`Applying ${templateName}`, description);
+            
+            // First clear all data in memory (fast)
+            roles.forEach(role => {
+                doctypes.forEach(doctype => {
+                    permissions.forEach(perm => {
+                        permissionsData[role][doctype][perm] = false;
+                    });
+                });
+            });
+            
+            // Apply template to data structure
+            switch(template) {
+                case 'admin':
+                    roles.filter(r => r.includes('Admin') || r.includes('Director')).forEach(role => {
+                        doctypes.forEach(doctype => {
+                            permissions.forEach(perm => {
+                                permissionsData[role][doctype][perm] = true;
+                            });
+                        });
+                    });
+                    break;
+                
+                case 'manager':
+                    roles.filter(r => r.includes('Manager')).forEach(role => {
+                        doctypes.forEach(doctype => {
+                            ['read', 'write', 'submit'].forEach(perm => {
+                                permissionsData[role][doctype][perm] = true;
+                            });
+                        });
+                    });
+                    break;
+                
+                case 'employee':
+                    const employeeDoctypes = ['Employee', 'Leave Application', 'Expense Claim', 'Timesheet', 'Attendance'];
+                    roles.forEach(role => {
+                        employeeDoctypes.forEach(doctype => {
+                            permissionsData[role][doctype].read = true;
+                        });
+                    });
+                    break;
+                
+                case 'hr':
+                    roles.filter(r => r.includes('HR')).forEach(role => {
+                        doctypes.forEach(doctype => {
+                            permissions.forEach(perm => {
+                                permissionsData[role][doctype][perm] = true;
+                            });
+                        });
+                    });
+                    break;
+            }
+            
+            // Update UI in batches
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const totalCheckboxes = checkboxes.length;
+            let index = 0;
+            
+            function processBatch() {
+                const batchSize = 100;
+                const end = Math.min(index + batchSize, totalCheckboxes);
+                
+                for (let i = index; i < end; i++) {
+                    const cb = checkboxes[i];
+                    const shouldCheck = permissionsData[cb.dataset.role][cb.dataset.doctype][cb.dataset.permission];
+                    cb.checked = shouldCheck;
+                }
+                
+                index = end;
+                const progress = Math.round((index / totalCheckboxes) * 100);
+                
+                if (index < totalCheckboxes) {
+                    updateProgressMessage(
+                        'Applying Template...', 
+                        progress,
+                        `${index} / ${totalCheckboxes} checkboxes`
+                    );
+                    setTimeout(processBatch, 10);
+                } else {
+                    updateProgressMessage('Finalizing...', 100, `${totalCheckboxes} / ${totalCheckboxes} checkboxes`);
+                    setTimeout(() => {
+                        document.getElementById('quickSelect').style.display = 'none';
+                        hideProcessingMessage();
+                        updateStats();
+                        saveToLocalStorage();
+                    }, 500);
+                }
+            }
+            
+            // Start processing after a small delay
+            setTimeout(processBatch, 100);
+        }
+
+        // Export data
+        function exportData() {
+            const modal = document.getElementById('exportModal');
+            modal.style.display = 'block';
+            updateExportPreview();
+        }
+
+        // Update export preview
+        function updateExportPreview() {
+            const format = document.querySelector('input[name="exportFormat"]:checked').value;
+            const preview = document.getElementById('exportPreview');
+            
+            if (format === 'json') {
+                preview.textContent = JSON.stringify(permissionsData, null, 2);
+            } else if (format === 'csv') {
+                let csv = 'Role,DocType,Read,Write,Submit,Cancel,Report\n';
+                roles.forEach(role => {
+                    doctypes.forEach(doctype => {
+                        const perms = permissionsData[role][doctype];
+                        csv += `"${role}","${doctype}",${perms.read ? 1 : 0},${perms.write ? 1 : 0},${perms.submit ? 1 : 0},${perms.cancel ? 1 : 0},${perms.report ? 1 : 0}\n`;
+                    });
+                });
+                preview.textContent = csv;
+            } else if (format === 'frappe') {
+                let frappeData = [];
+                roles.forEach(role => {
+                    doctypes.forEach(doctype => {
+                        const perms = permissionsData[role][doctype];
+                        if (perms.read || perms.write || perms.submit || perms.cancel || perms.report) {
+                            frappeData.push({
+                                doctype: 'Custom DocPerm',
+                                parent: doctype,
+                                role: role,
+                                permlevel: 0,
+                                read: perms.read ? 1 : 0,
+                                write: perms.write ? 1 : 0,
+                                submit: perms.submit ? 1 : 0,
+                                cancel: perms.cancel ? 1 : 0,
+                                report: perms.report ? 1 : 0
+                            });
+                        }
+                    });
+                });
+                preview.textContent = JSON.stringify(frappeData, null, 2);
+            }
+        }
+
+        // Download export with better browser compatibility
+        function downloadExport() {
+            const format = document.querySelector('input[name="exportFormat"]:checked').value;
+            let content = '';
+            let filename = '';
+            let mimeType = '';
+            
+            showProcessingMessage('Preparing Download...', 'Generating your export file');
+            
+            if (format === 'json') {
+                content = JSON.stringify(permissionsData, null, 2);
+                filename = 'frappe_permissions.json';
+                mimeType = 'application/json;charset=utf-8';
+            } else if (format === 'csv') {
+                let csv = 'Role,DocType,Read,Write,Submit,Cancel,Report\n';
+                roles.forEach(role => {
+                    doctypes.forEach(doctype => {
+                        const perms = permissionsData[role][doctype];
+                        csv += `"${role}","${doctype}",${perms.read ? 1 : 0},${perms.write ? 1 : 0},${perms.submit ? 1 : 0},${perms.cancel ? 1 : 0},${perms.report ? 1 : 0}\n`;
+                    });
+                });
+                content = csv;
+                filename = 'frappe_permissions.csv';
+                mimeType = 'text/csv;charset=utf-8';
+            } else if (format === 'frappe') {
+                let frappeData = [];
+                roles.forEach(role => {
+                    doctypes.forEach(doctype => {
+                        const perms = permissionsData[role][doctype];
+                        if (perms.read || perms.write || perms.submit || perms.cancel || perms.report) {
+                            frappeData.push({
+                                doctype: 'Custom DocPerm',
+                                parent: doctype,
+                                role: role,
+                                permlevel: 0,
+                                read: perms.read ? 1 : 0,
+                                write: perms.write ? 1 : 0,
+                                submit: perms.submit ? 1 : 0,
+                                cancel: perms.cancel ? 1 : 0,
+                                report: perms.report ? 1 : 0
+                            });
+                        }
+                    });
+                });
+                content = JSON.stringify(frappeData, null, 2);
+                filename = 'frappe_docperms.json';
+                mimeType = 'application/json;charset=utf-8';
+            }
+            
+            // Method 1: Try using Blob with better compatibility
+            try {
+                const blob = new Blob([content], { type: mimeType });
+                
+                // For IE/Edge Legacy
+                if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                    window.navigator.msSaveOrOpenBlob(blob, filename);
+                    hideProcessingMessage();
+                    closeModal();
+                    return;
+                }
+                
+                // Modern browsers
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.style.display = 'none';
+                
+                // Append to body, click, and remove
+                document.body.appendChild(link);
+                link.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    hideProcessingMessage();
+                    closeModal();
+                }, 100);
+                
+            } catch (e) {
+                console.error('Download failed:', e);
+                
+                // Fallback: Create a data URI
+                try {
+                    const dataUri = 'data:' + mimeType + ',' + encodeURIComponent(content);
+                    const link = document.createElement('a');
+                    link.href = dataUri;
+                    link.download = filename;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    hideProcessingMessage();
+                    closeModal();
+                } catch (e2) {
+                    // Last resort: Show content for manual copy
+                    hideProcessingMessage();
+                    alert('Automatic download failed. Please copy the content from the preview box and save it manually.');
+                    console.error('All download methods failed:', e2);
+                }
+            }
+        }
+
+        // Import data with validation
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                showProcessingMessage('Importing configuration...');
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        
+                        // Validate the structure
+                        let isValid = true;
+                        if (!imported || typeof imported !== 'object') {
+                            isValid = false;
+                        } else {
+                            // Check if it has the expected structure
+                            const sampleRole = Object.keys(imported)[0];
+                            if (!sampleRole || !imported[sampleRole] || typeof imported[sampleRole] !== 'object') {
+                                isValid = false;
+                            }
+                        }
+                        
+                        if (!isValid) {
+                            hideProcessingMessage();
+                            alert('Invalid file format. Please ensure it\'s a valid permissions JSON file.');
+                            return;
+                        }
+                        
+                        // Merge with existing structure (in case of missing roles/doctypes)
+                        roles.forEach(role => {
+                            if (!imported[role]) {
+                                imported[role] = {};
+                            }
+                            doctypes.forEach(doctype => {
+                                if (!imported[role][doctype]) {
+                                    imported[role][doctype] = {
+                                        read: false,
+                                        write: false,
+                                        submit: false,
+                                        cancel: false,
+                                        report: false
+                                    };
+                                }
+                            });
+                        });
+                        
+                        permissionsData = imported;
+                        saveToLocalStorage();
+                        
+                        // Rebuild table with new data
+                        setTimeout(() => {
+                            buildTable();
+                            alert('Data imported successfully!');
+                        }, 100);
+                        
+                    } catch (error) {
+                        hideProcessingMessage();
+                        console.error('Import error:', error);
+                        alert('Error importing file: ' + error.message);
+                    }
+                };
+                
+                reader.onerror = function() {
+                    hideProcessingMessage();
+                    alert('Error reading file. Please try again.');
+                };
+                
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('exportModal').style.display = 'none';
+        }
+
+        // Local storage functions with error handling
+        function saveToLocalStorage() {
+            try {
+                const dataStr = JSON.stringify(permissionsData);
+                localStorage.setItem('frappePermissions', dataStr);
+                localStorage.setItem('frappePermissionsBackup', dataStr);
+                localStorage.setItem('lastSaved', new Date().toISOString());
+                return true;
+            } catch (e) {
+                console.error('Error saving to localStorage:', e);
+                if (e.name === 'QuotaExceededError') {
+                    alert('Storage quota exceeded. Clearing old data and retrying...');
+                    localStorage.removeItem('frappePermissionsBackup');
+                    try {
+                        localStorage.setItem('frappePermissions', JSON.stringify(permissionsData));
+                        return true;
+                    } catch (e2) {
+                        alert('Unable to save. Please export your data manually.');
+                        return false;
+                    }
+                }
+                return false;
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('frappePermissions');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    // Validate structure
+                    if (parsed && typeof parsed === 'object') {
+                        permissionsData = parsed;
+                        const lastSaved = localStorage.getItem('lastSaved');
+                        if (lastSaved) {
+                            console.log('Loaded data last saved at:', new Date(lastSaved));
+                        }
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading saved data:', e);
+                // Try backup
+                try {
+                    const backup = localStorage.getItem('frappePermissionsBackup');
+                    if (backup) {
+                        permissionsData = JSON.parse(backup);
+                        console.log('Loaded from backup');
+                        return true;
+                    }
+                } catch (e2) {
+                    console.error('Backup also corrupted');
+                }
+            }
+            return false;
+        }
+
+        function saveProgress() {
+            showProcessingMessage('Saving progress...', 'Storing your configuration');
+            
+            if (saveToLocalStorage()) {
+                // Prepare backup download
+                const timestamp = new Date().toISOString().split('T')[0];
+                const dataStr = JSON.stringify(permissionsData, null, 2);
+                const filename = `frappe_permissions_backup_${timestamp}.json`;
+                
+                setTimeout(() => {
+                    hideProcessingMessage();
+                    
+                    if (confirm('Progress saved locally! Would you also like to download a backup file?')) {
+                        // Create and trigger download
+                        try {
+                            const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+                            
+                            // IE/Edge Legacy
+                            if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                                window.navigator.msSaveOrOpenBlob(blob, filename);
+                                return;
+                            }
+                            
+                            // Modern browsers
+                            const url = window.URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = filename;
+                            link.style.display = 'none';
+                            document.body.appendChild(link);
+                            link.click();
+                            
+                            // Cleanup
+                            setTimeout(() => {
+                                document.body.removeChild(link);
+                                window.URL.revokeObjectURL(url);
+                            }, 100);
+                            
+                        } catch (e) {
+                            // Fallback
+                            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                            const link = document.createElement('a');
+                            link.href = dataUri;
+                            link.download = filename;
+                            link.style.display = 'none';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        }
+                    }
+                }, 500);
+            } else {
+                hideProcessingMessage();
+                alert('Failed to save progress. Please export your configuration manually.');
+            }
+        }
+
+        // Clear all saved data
+        function clearSavedData() {
+            if (confirm('This will clear all saved permission data. Are you sure?')) {
+                localStorage.removeItem('frappePermissions');
+                localStorage.removeItem('frappePermissionsBackup');
+                localStorage.removeItem('lastSaved');
+                location.reload();
+            }
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard() {
+            const preview = document.getElementById('exportPreview');
+            const text = preview.textContent;
+            
+            // Modern clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        alert('Content copied to clipboard! You can now paste it into a file.');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy:', err);
+                        fallbackCopy(text);
+                    });
+            } else {
+                // Fallback for older browsers
+                fallbackCopy(text);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                const success = document.execCommand('copy');
+                if (success) {
+                    alert('Content copied to clipboard! You can now paste it into a file.');
+                } else {
+                    alert('Copy failed. Please use the "Select All" button and copy manually (Ctrl+C / Cmd+C).');
+                }
+            } catch (err) {
+                alert('Copy failed. Please use the "Select All" button and copy manually (Ctrl+C / Cmd+C).');
+            }
+            
+            document.body.removeChild(textarea);
+        }
+        
+        function selectAllText() {
+            const preview = document.getElementById('exportPreview');
+            
+            if (window.getSelection) {
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(preview);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                // Also try to focus for better compatibility
+                preview.focus();
+                
+                alert('Text selected! Now press Ctrl+C (or Cmd+C on Mac) to copy.');
+            } else if (document.selection) {
+                // IE fallback
+                const range = document.body.createTextRange();
+                range.moveToElementText(preview);
+                range.select();
+                alert('Text selected! Now press Ctrl+C to copy.');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('searchBox').addEventListener('input', searchTable);
+        
+        document.querySelectorAll('input[name="exportFormat"]').forEach(radio => {
+            radio.addEventListener('change', updateExportPreview);
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('exportModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            initializeData();
+            buildTable();
+        };
+
+        // Auto-save every 30 seconds
+        setInterval(saveToLocalStorage, 30000);
+    </script>
+</body>
+</html>
