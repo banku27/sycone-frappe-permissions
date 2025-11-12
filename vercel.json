@@ -1,14 +1,10 @@
 {
   "version": 2,
   "name": "frappe-permissions-configurator",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/",
-      "dest": "/frappe_permissions_configurator.html"
-    },
-    {
-      "src": "/frappe_permissions_configurator.html",
-      "dest": "/frappe_permissions_configurator.html"
+      "source": "/",
+      "destination": "/frappe_permissions_configurator.html"
     }
   ],
   "headers": [
